@@ -54,6 +54,7 @@ A lightweight AI model is integrated to predict whether the input gene sequence 
 2. Install dependencies:  
    ```bash
    pip install -r requirements.txt
+   python setup.py
 
 3. Run the backend
    ```bash

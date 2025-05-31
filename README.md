@@ -1,24 +1,23 @@
 # hack-4-mini
 
 ## Description
-A brief description of what this project does.
-
-For example:  
-This project is a Python-based web application that serves a dashboard using HTML, CSS, and JavaScript files.
+This is a Python-based web application for gene analysis and visualization. It takes gene sequences as input and visualizes both healthy and diseased genes using an interactive dashboard built with HTML, CSS, and JavaScript.  
+A small AI model is integrated to predict whether the input gene is diseased or not.
 
 ## Project Structure
-- `main.py` - Main Python script to run the app  
-- `dash.html` - HTML page for the dashboard  
-- `js/` - Folder containing JavaScript files  
-- `css/` - Folder containing CSS files  
-- `setup.py` - Setup file for installing dependencies  
+- `main.py` - Main Python script (backend logic)  
+- `dash.html` - Frontend dashboard page  
+- `js/` - Contains JavaScript files  
+- `css/` - Contains CSS files for styling  
+- `setup.py` - Used to install required dependencies  
 
 ## How to Run
 
 1. Make sure you have Python installed.  
-2. Install dependencies (if any):  
+2. Install dependencies:  
    ```bash
    python setup.py install
+
    python main.py
 
 

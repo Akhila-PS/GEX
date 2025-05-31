@@ -49,7 +49,7 @@ A lightweight AI model is integrated to predict whether the input gene sequence 
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/Abijith-vs/Hack-4-mini.git
+   git clone https://github.com/Akhila-PS/GEX
    cd Hack-4-mini
   
 2. Install dependencies:  

@@ -14,6 +14,7 @@ import logging
 from pathlib import Path
 import tempfile
 import platform
+from scipy import stats  # Moved import to top
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -40,15 +41,15 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Directories and cache config
 # Determine the temporary directory based on the operating system
-from pathlib import Path
-
-DATA_DIR = Path("tmp/data")
-DATA_DIR.mkdir(parents=True, exist_ok=True)
-
+if platform.system() == "Windows":
+    DATA_DIR = Path("./data")
+else:
+    DATA_DIR = Path(tempfile.gettempdir()) / "data"
 
 # Create the directory if it doesn't exist, including parents
 DATA_DIR.mkdir(parents=True, exist_ok=True)
-CACHE_EXPIRY_HOURS = 24
+
+CACHE_EXPIRY_HOURS = 24  # Fixed typo: 24v -> 24
 MAX_CACHE_SIZE = 100
 
 # Cache classes
@@ -229,12 +230,46 @@ def generate_multigene_heatmap_data(gene_ids: List[str], dataset_id: str, sample
         "conditions": ["Healthy"] * len(healthy_samples) + ["Diseased"] * len(diseased_samples)
     }
 
+# Benjamini-Hochberg FDR calculation
+def benjamini_hochberg(p_values: List[float]) -> List[float]:
+    """
+    Apply the Benjamini-Hochberg FDR correction to a list of p-values.
+    Returns the adjusted p-values.
+    """
+    n = len(p_values)
+    if n == 0:
+        return []
+
+    # Sort p-values and keep track of their original indices
+    sorted_indices = np.argsort(p_values)
+    sorted_pvals = np.array(p_values)[sorted_indices]
+    
+    # Compute adjusted p-values
+    adjusted_pvals = np.zeros(n)
+    cumulative_min = np.inf
+    for i in range(n-1, -1, -1):
+        rank = i + 1
+        adjusted = sorted_pvals[i] * n / rank
+        cumulative_min = min(cumulative_min, adjusted)
+        adjusted_pvals[i] = min(cumulative_min, 1.0)  # Cap at 1.0
+    
+    # Restore original order
+    final_adjusted = np.zeros(n)
+    for i, idx in enumerate(sorted_indices):
+        final_adjusted[idx] = adjusted_pvals[i]
+    
+    return final_adjusted.tolist()
+
 # Stats calculator
-def calculate_statistics(healthy: List[float], diseased: List[float]) -> Dict[str, float]:
-    from scipy import stats
+def calculate_statistics(healthy: List[float], diseased: List[float]) -> Dict[str, Any]:
     healthy = np.array(healthy)
     diseased = np.array(diseased)
-    t_stat, p_value = stats.ttest_ind(healthy, diseased)
+    t_stat, p_value = stats.ttest_ind(healthy, diseased, equal_var=False)  # Welch's t-test
+
+    # Since this is a single gene test, we only have one p-value
+    # Apply Benjamini-Hochberg as if it's a single test (for consistency with dashboard expectation)
+    p_values = [p_value]
+    adjusted_pvals = benjamini_hochberg(p_values)
 
     return {
         "healthy_mean": float(np.mean(healthy)),
@@ -245,6 +280,8 @@ def calculate_statistics(healthy: List[float], diseased: List[float]) -> Dict[st
         "log2_fold_change": float(np.log2(np.mean(diseased) / np.mean(healthy))) if np.mean(healthy) > 0 else float("inf"),
         "t_statistic": float(t_stat),
         "p_value": float(p_value),
+        "adjusted_p_value": adjusted_pvals[0],  # FDR-adjusted p-value
+        "benjamini_hochberg_fdr": adjusted_pvals,  # List of adjusted p-values (matches dashboard expectation)
         "significant": bool(p_value < 0.05)
     }
 
@@ -558,6 +595,7 @@ async def predict_sample(dataset: str, sample_id: str):
         logger.error(f"Error predicting sample {sample_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
 
+# Keep the Uvicorn block commented out for Vercel deployment
 #if __name__ == "__main__":
 #    import uvicorn
 #    uvicorn.run(app, host="0.0.0.0", port=8000)

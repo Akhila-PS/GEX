@@ -1,4 +1,4 @@
-# GeX (Gene expression explorer)
+# GeX (Gene Expression Explorer)
 
 ## 🧬 Description
 **GeX** is a bioinformatics web application for gene expression analysis and visualization. It allows users to input gene sequences and visualize expression differences between healthy and diseased samples using an interactive dashboard.
@@ -27,7 +27,6 @@ A lightweight AI model is integrated to predict whether the input gene sequence 
 - **Backend**: Python (Fastapi)
 - **Libraries**: GEOparse, Pandas, SciPy
 - **Visualization**: Plotly, Chart.js
-- **Hosting**: Vercel (Frontend), Railway (Backend)
 - **Data Source**: NCBI GEO
 
 ---

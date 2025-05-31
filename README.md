@@ -1,7 +1,7 @@
 # GeX (Gene expression explorer)
 
 ## 🧬 Description
-**Hack-4-Mini** is a bioinformatics web application for gene expression analysis and visualization. It allows users to input gene sequences and visualize expression differences between healthy and diseased samples using an interactive dashboard.
+**GeX** is a bioinformatics web application for gene expression analysis and visualization. It allows users to input gene sequences and visualize expression differences between healthy and diseased samples using an interactive dashboard.
 
 A lightweight AI model is integrated to predict whether the input gene sequence is diseased or not.
 
